@@ -1,11 +1,11 @@
-openai
-langchain
 streamlit
-pyaudio
+langchain
+langchain-google-genai
+python-dotenv
+streamlit-extras
+speechrecognition
+pydub
 openai-whisper
-htbuilder
-rich
-markdown-it-py
-pygments
-mdurl
+pyaudio ; sys_platform == "win32"
+ffmpeg
 langchain_google_genai
