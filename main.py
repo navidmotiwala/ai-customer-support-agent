@@ -47,22 +47,27 @@ Powered by **Gemini AI** for intelligent and automated support.
 """)
 add_vertical_space(1)
 
-# Input Mode Selection
+# Input mode
 input_mode = st.radio("Choose Input Mode:", ["📝 Text Input", "🎤 Voice Input"])
 user_query = ""
 
-# Handle Input
 if input_mode == "📝 Text Input":
     user_query = st.text_input("Type your request:")
 
 else:
     st.markdown("### 🎙️ Click the button below to start speaking")
     if st.button("🎤 Start Voice Recording"):
-        st.info("Listening... Speak now.")
+        st.info("🎙️ Listening... Please speak into your mic.")
         result = st_javascript("""
             const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
             async function recordVoice() {
+              try {
+                await navigator.mediaDevices.getUserMedia({ audio: true }); // 🔐 Ask for mic access
+              } catch (err) {
+                return "❌ Mic permission denied";
+              }
+
               const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
               recognition.lang = 'en-US';
               recognition.interimResults = false;
@@ -77,7 +82,7 @@ else:
                   recognition.stop();
                 };
                 recognition.onerror = (event) => {
-                  reject("Error: " + event.error);
+                  reject("❌ Speech error: " + event.error);
                 };
                 recognition.start();
               });
@@ -91,13 +96,14 @@ else:
                 return e;
             }
         """)
-        if result and "Error" not in result:
+
+        if result and not result.startswith("❌"):
             user_query = result
             st.success(f"You said: {result}")
         else:
-            st.warning("🎤 Didn't catch anything. Please try again and allow mic access.")
+            st.warning(result if result else "🎤 Didn't catch anything. Try again and allow mic access.")
 
-# Gemini Processing + Task Execution
+# Process input
 if user_query:
     st.markdown("---")
     st.subheader("🤖 Gemini's Response")
