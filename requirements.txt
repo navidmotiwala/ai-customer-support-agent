@@ -1,17 +1,14 @@
-openai-whisper
+# Base requirements for your project
+openai
+langchain
+streamlit
 pyaudio
+openai-whisper
 htbuilder
 rich
 markdown-it-py
 pygments
 mdurl
-six
-smmap
-anyio
-h11
-pyasn1
-sniffio
-soupsieve
-rsa
-langchain
+portaudio19-dev  # For Ubuntu/Debian systems
+python3-pyaudio   # For Ubuntu/Debian systems (alternative if you are facing issues with pyaudio)
 langchain_google_genai
