@@ -9,4 +9,3 @@ openai-whisper
 pyaudio ; sys_platform == "win32"
 ffmpeg
 langchain_google_genai
-pyaudio
