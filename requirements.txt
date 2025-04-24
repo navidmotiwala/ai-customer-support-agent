@@ -6,4 +6,3 @@ streamlit-extras
 streamlit-javascript
 openai-whisper
 pydub
-# ❌ Removed PyAudio and SpeechRecognition (not cloud-compatible)
