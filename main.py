@@ -2,13 +2,11 @@ import os
 import streamlit as st
 from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
-import speech_recognition as sr
 from streamlit_extras.add_vertical_space import add_vertical_space
+from streamlit_javascript import st_javascript
 
 # Load environment variables
 load_dotenv()
-
-# Gemini API Key
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # Initialize Gemini LLM
@@ -17,27 +15,11 @@ llm = ChatGoogleGenerativeAI(
     api_key=GEMINI_API_KEY
 )
 
-# Function to simulate automation task
+# Function to simulate workflow tasks
 def simulate_workflow(task):
     st.success(f"✅ {task}")
 
-# Voice Input Handler
-def get_voice_input():
-    r = sr.Recognizer()
-    with sr.Microphone() as source:
-        st.info("🎤 Listening...")
-        audio = r.listen(source)
-    try:
-        text = r.recognize_google(audio)
-        st.success(f"You said: {text}")
-        return text
-    except sr.UnknownValueError:
-        st.error("Sorry, could not understand audio.")
-    except sr.RequestError:
-        st.error("Could not request results. Check internet connection.")
-    return ""
-
-# Advanced customer support workflow classification
+# Function to classify user intent
 def classify_and_simulate(query):
     lowered = query.lower()
     if "book" in lowered and "appointment" in lowered:
@@ -55,9 +37,10 @@ def classify_and_simulate(query):
     else:
         simulate_workflow("📝 CRM entry created. A support follow-up is scheduled.")
 
-# UI Setup
+# UI setup
 st.set_page_config(page_title="AI Customer Support Agent", layout="centered")
 st.title("💬 AI Customer Support Agent")
+
 st.markdown("""
 Welcome to your **smart AI support assistant**. You can ask questions, book appointments,
 send emails, or handle customer service tasks using your **voice or text**.
@@ -66,19 +49,49 @@ Powered by **Gemini AI** for intelligent and automated support.
 
 add_vertical_space(1)
 
-# User selects input mode
+# Input Mode Selector
 input_mode = st.radio("Choose Input Mode:", ["📝 Text Input", "🎤 Voice Input"])
+user_query = ""
 
-# Get user query
 if input_mode == "📝 Text Input":
     user_query = st.text_input("Type your request:")
 else:
-    if st.button("🎙️ Start Recording"):
-        user_query = get_voice_input()
-    else:
-        user_query = ""
+    st.info("Click the mic icon and speak...")
+    result = st_javascript(code="""
+        const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-# Handle response
+        async function recordVoice() {
+          const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+          recognition.lang = 'en-US';
+          recognition.interimResults = false;
+          recognition.maxAlternatives = 1;
+
+          return await new Promise((resolve, reject) => {
+            recognition.onresult = (event) => {
+              const text = event.results[0][0].transcript;
+              resolve(text);
+            };
+            recognition.onerror = (event) => {
+              reject("Error: " + event.error);
+            };
+            recognition.start();
+          });
+        }
+
+        await sleep(100);
+        try {
+            const result = await recordVoice();
+            return result;
+        } catch (e) {
+            return e;
+        }
+    """)
+
+    if result:
+        user_query = result
+        st.success(f"You said: {result}")
+
+# Main processing
 if user_query:
     st.markdown("---")
     st.subheader("🤖 Gemini's Response")
@@ -88,7 +101,6 @@ if user_query:
     st.markdown("---")
     st.subheader("🔧 Support Task Execution")
     classify_and_simulate(user_query)
-
     st.balloons()
 
 st.markdown("---")
