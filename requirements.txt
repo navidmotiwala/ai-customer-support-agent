@@ -3,9 +3,7 @@ langchain
 langchain-google-genai
 python-dotenv
 streamlit-extras
-speechrecognition
-pydub
+streamlit-javascript
 openai-whisper
-pyaudio ; sys_platform == "win32"
-ffmpeg
-langchain_google_genai
+pydub
+# ❌ Removed PyAudio and SpeechRecognition (not cloud-compatible)
