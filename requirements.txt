@@ -1,0 +1,9 @@
+streamlit
+langchain
+langchain-google-genai
+python-dotenv
+streamlit-extras
+speechrecognition
+pydub
+openai-whisper
+pyaudio
