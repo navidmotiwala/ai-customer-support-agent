@@ -5,19 +5,21 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from streamlit_extras.add_vertical_space import add_vertical_space
 from streamlit_javascript import st_javascript
 
-# Load environment
+# Load environment variables
 load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-# Init Gemini
+# Initialize Gemini LLM
 llm = ChatGoogleGenerativeAI(
     model="gemini-2.0-flash",
     api_key=GEMINI_API_KEY
 )
 
+# Simulate a support workflow
 def simulate_workflow(task):
     st.success(f"✅ {task}")
 
+# Classify query and simulate task
 def classify_and_simulate(query):
     lowered = query.lower()
     if "book" in lowered and "appointment" in lowered:
@@ -35,7 +37,7 @@ def classify_and_simulate(query):
     else:
         simulate_workflow("📝 CRM entry created. A support follow-up is scheduled.")
 
-# Streamlit layout
+# UI Setup
 st.set_page_config(page_title="AI Customer Support Agent", layout="centered")
 st.title("💬 AI Customer Support Agent")
 st.markdown("""
@@ -45,15 +47,18 @@ Powered by **Gemini AI** for intelligent and automated support.
 """)
 add_vertical_space(1)
 
+# Input Mode Selection
 input_mode = st.radio("Choose Input Mode:", ["📝 Text Input", "🎤 Voice Input"])
 user_query = ""
 
+# Handle Input
 if input_mode == "📝 Text Input":
     user_query = st.text_input("Type your request:")
 
 else:
-    st.markdown("### 🎙️ Click the button below to speak")
-    if st.button("🎤 Start Voice Input"):
+    st.markdown("### 🎙️ Click the button below to start speaking")
+    if st.button("🎤 Start Voice Recording"):
+        st.info("Listening... Speak now.")
         result = st_javascript("""
             const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -68,6 +73,9 @@ else:
                   const text = event.results[0][0].transcript;
                   resolve(text);
                 };
+                recognition.onspeechend = () => {
+                  recognition.stop();
+                };
                 recognition.onerror = (event) => {
                   reject("Error: " + event.error);
                 };
@@ -75,7 +83,7 @@ else:
               });
             }
 
-            await sleep(100);
+            await sleep(200);
             try {
                 const result = await recordVoice();
                 return result;
@@ -83,12 +91,13 @@ else:
                 return e;
             }
         """)
-        if result:
+        if result and "Error" not in result:
             user_query = result
             st.success(f"You said: {result}")
         else:
-            st.warning("No voice detected yet...")
+            st.warning("🎤 Didn't catch anything. Please try again and allow mic access.")
 
+# Gemini Processing + Task Execution
 if user_query:
     st.markdown("---")
     st.subheader("🤖 Gemini's Response")
