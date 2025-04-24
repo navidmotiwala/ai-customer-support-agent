@@ -1,4 +1,3 @@
-# Base requirements for your project
 openai
 langchain
 streamlit
@@ -9,6 +8,4 @@ rich
 markdown-it-py
 pygments
 mdurl
-portaudio19-dev  # For Ubuntu/Debian systems
-python3-pyaudio   # For Ubuntu/Debian systems (alternative if you are facing issues with pyaudio)
 langchain_google_genai
